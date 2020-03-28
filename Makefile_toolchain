@@ -1,0 +1,66 @@
+# version: 1.0.0
+.PHONY: help all
+
+btp := "./build_temp_path"
+drp := "./dist"
+
+all: help
+
+ifeq ($(OS), Windows_NT)
+define python_script_call
+	"$(1)" $(2) $(3)
+endef
+else
+define python_script_call
+	@python $(shell which $(1)) $(2) $(3)
+endef
+endif
+
+token_param := --access_token=$(gitlab_token)
+
+help::
+	@echo sphinx - build the .rst files for the project.
+sphinx:
+	@echo ">> create document files"
+	@$(call python_script_call,append_documentation.py)
+	sphinx-apidoc -f -o docs ./src/
+
+#
+# METASCRIPT TARGETS
+#
+.PHONY: version_check version_file version_module custom_checks version_increment_check module_tags_check
+help::
+	@echo zip_executable - Zips the executable in the dist folder
+zip_executable:
+	@$(call python_script_call,zip_executable.py)
+
+.PHONY: version_check version_file version_module custom_checks version_increment_check module_tags_check
+help::
+	@echo version_check - run version check against meta library template
+version_check:
+	@$(call python_script_call,version_checker.py,$(token_param))
+
+help::
+	@echo version_file - Creates a version.json containing setup.py version
+version_file:
+	@$(call python_script_call,create_version_file.py, ./src/version.json)
+
+help::
+	@echo version_module - Creates a version module containing all modules and their versions which are used within the package
+version_module:
+	@$(call python_script_call,create_version_module.py,./src/)
+
+help::
+	@echo custom_checks - Executes custom checks
+custom_checks:
+	@$(call python_script_call,custom_checks.py)
+
+help::
+	@echo version_increment_check - Checks that the setup.py version is greater than the version of the master branch.
+version_increment_check:
+	@$(call python_script_call,version_increment_check.py,$(token_param))
+
+help::
+	@echo module_tags_check - Assures that at least one module tag is set to true
+module_tags_check:
+	@$(call python_script_call,module_tags_check.py,$(token_param),--file ./module_tags.json)

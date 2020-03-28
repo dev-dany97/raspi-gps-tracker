@@ -1,0 +1,21 @@
+# version: 1.0.0
+# dependencies of this package (they are also used in setup.py)
+python-dateutil
+pyserial
+requests
+# this file also contains pip "meta" requirements (packages which are needed to build and test this package, they are NOT used in setup.py)
+pycodestyle
+pylint
+coverage
+sphinx==1.7.7 # 1.8.5 is not working with sphinxcontrib-versioning
+docutils==0.14 # docutils 0.15 removed nodes -> sphinx: from docutils import nodes
+sphinxcontrib-versioning==2.2.1
+sphinxcontrib-images==0.8 # version >=0.9 is not supported for python2.x
+sphinxcontrib-plantuml==0.18
+wheel
+pyinstaller
+mock
+requirements-parser~=0.2.0
+packaging==19.0
+future
+scandir
