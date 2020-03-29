@@ -23,7 +23,6 @@ def main():
     com_handler = None
     # declare message
     msg_block = Message()
-    '''
     # open Serial Port communication
     connecetion_established = False
     while not connecetion_established:
@@ -41,15 +40,14 @@ def main():
     com_handler.send_data("AT", check_response=True)
     
     # start thread gps handler
-    gps_handler = GPS(com_handler, msg_block)
+    ## gps_handler = GPS(com_handler, msg_block)
     # run GPS module
-    gps_handler.run()  # endless loop, if no stop command send!
-    '''
+    ## gps_handler.run()  # endless loop, if no stop command send!
     # start thread upload handler
     msg_block.lat = 51.013432
     msg_block.lng = 12.101624
     msg_block.timestamp = 27032020111260
-    upload_handler = UbiApi(msg_block)
+    upload_handler = UbiApi(com_handler, msg_block)
 
     # every 30sec upload data
     while True:

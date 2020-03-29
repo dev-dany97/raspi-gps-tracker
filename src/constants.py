@@ -10,15 +10,24 @@ ENTER_KEY = '\r\n'
 ERROR_STRING = 'ERROR' + ENTER_KEY
 OK_STRING = 'OK' + ENTER_KEY
 
-# SIM Card constants
+# SIM Card constants (GPRS Commands)
 SIM_CARD_COMMANDS = {
     "GPRS_NET_LOG_IN": "AT+CGATT",  # GPRS-Netz eingebucht? (1 -> eingebucht, 0 -> nicht eingebucht)
     "SET_APN": "AT+SAPBR=3,1,\"APN\",\"TM\"",
     "OPEN_GPRS_CONTEXT": "AT+SAPBR=1,1",  # GPRS-Kontext öffnen; LED blinkt dann sehr rasch
     "USER_REQUEST": "AT+SAPBR=2,1",  # Nutzer-Anfrage
     "INIT_HHTP_SERVICE": "AT+HTTPINIT",  # HTTP-Dienst initialisieren
-    "SET_HTTP_PARAMS": "AT+HTTPPARA=\"URL\",\"http://www.google.de/\"",  # HTTP-Parameter setzen: URL angeben
+    "SET_HTTP_URL": "AT+HTTPPARA=\"URL\",\"http://industrial.api.ubidots.com/api/v1.6/devices/raspberryPiGPSTracker\"",
+    # HTTP-Parameter setzen: URL angeben
+    "SET_HTTP_USERDATA": "AT+HTTPPARA=\"USERDATA\",\"X-Auth-Token: YOUR-UBIDOTS-TOKEN\"",
+    # HTTP-Parameter setzen: Userdata angeben
+    "SET_HTTP_CONTENT": "AT+HTTPPARA=\"CONTENT\",\"application/json\"",
+    # HTTP-Parameter setzen: Http Content typ angeben
+    "SET_HTTP_DATA": "AT+HTTPDATA=192,1000",
+    # Set Size in bytes of the data to POST and
+    # the maximum time in milliseconds to input data (only between 1000-120000 (millisecond))
     "SEND_GET_REQ": "AT+HTTPACTION=0",  # Abfrage starten (0->GET)
+    "SEND_POST_REQ": "AT+HTTPACTION=1",  # Upload starten (1->POST)
     "READ_HTTP_ANSWER": "AT+HTTPREAD",  # Antwort des HTTP-Servers lesen
     "SHUTDOWN_HTTP_SERVICE": "AT+HTTPTERM",  # HTTP-Dienst beenden
     "CLOSE_GPRS_CONTEXT": "AT+SAPBR=0,1"  # GPRS-Kontext schließen; LED blinkt dann wieder im 3-s-Rhythmus
@@ -86,3 +95,13 @@ GPGSA = '((\$GPGSA),(.*)(\\r\\n\$GLGSA))'
 GPGSV = '((\$GPGSV),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*)(\\r\\n\$GPGSV))'
 GNVTG = '((\$GNVTG),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*)(\\r\\n))'
 GNRMC = '((\$GNRMC),([0-9.]{0,10}),(.*),([0-9.]{0,11}),([N,S]?),([0-9.]{0,12}),([E,W]?),(.*),(.*),(.*),(.*),(.*),(.*)(\\r\\n\$GNVTG))'
+
+
+# READ data response <HTTP method specification, HTTP Status Code ,data length>
+DATA_RESPONSE_REGEX = '\\+HTTPACTION: 1,([0-9]{3}),([0-9]*)'
+
+
+# APN data
+GPRS_APN = "TN"  # replace with your GPRS APN
+GPRS_LOGIN = "login"  # replace with your GPRS login
+GPRS_PASSWORD = "password"  # replace with your GPRS password
