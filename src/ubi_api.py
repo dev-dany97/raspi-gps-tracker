@@ -3,16 +3,16 @@
 # author: d.mohles
 # This lib provides UBI Dots API interface functionality
 import json
-import time
-import re
-import requests
 import random
+import re
+import time
 
-from constants import SIM_CARD_COMMANDS, DATA_RESPONSE_REGEX
+import requests
+
+from constants import SIM_CARD_COMMANDS, DATA_RESPONSE_REGEX, OK_STRING
 
 
 class UbiApi:
-
     UBI_DOTS_URL = "http://industrial.api.ubidots.com"
     TOKEN = "YOUR-UBIDOTS-TOKEN"  # TOKEN
     API_KEY = "YOUR-UBIDOTS-API-KEY"  # API Key
@@ -20,8 +20,9 @@ class UbiApi:
     Time_LABEL = "timestamp"  # Put your first variable label here
     VARIABLE_LABEL = "variable"  # Put your second variable label here
     Position_LABEL = "position"  # Put your second variable label here
-    #LAT = 51.013432
-    #LNG = 12.101624
+
+    # LAT = 51.013432
+    # LNG = 12.101624
 
     def __init__(self, com_handler, msg_block):
         """
@@ -29,12 +30,24 @@ class UbiApi:
         """
         self._com_handler = com_handler
         self._msg_block = msg_block
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["GPRS_NET_LOG_IN"])
+        if not self._com_handler.receive_data("+CGATT: 1\r\n\r\n" + OK_STRING):
+            self._com_handler.send_data(SIM_CARD_COMMANDS["GPRS_NET_LOG_IN"])
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["OPEN_GPRS_CONTEXT"], check_response=True)
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["USER_REQUEST"])
+        if not self._com_handler.receive_data(
+                "+SAPBR: 1,1,\"[0-9]{1-3}.[0-9]{1-3}.[0-9]{1-3}.[0-9]{1-3}\"\r\n\r\n" + OK_STRING):
+            self._com_handler.send_data(SIM_CARD_COMMANDS["USER_REQUEST"])
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["INIT_HHTP_SERVICE"], check_response=True)
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["SET_HTTP_URL"], check_response=True)
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["SET_HTTP_USERDATA"], check_response=True)
+
         self._com_handler.send_data(SIM_CARD_COMMANDS["SET_HTTP_CONTENT"], check_response=True)
 
     def upload_data(self):
@@ -90,27 +103,30 @@ class UbiApi:
         # Check if json data is correct:
         try:
             json.loads(payload)
-        except ValueError:
-            print("No valid JSON format! -> Check PAYLOAD data")
-            return False
+        except TypeError:
+            payload = json.dumps(payload)
+            if not json.loads(payload):
+                raise ("Cannot convert payload to valid JSON format! -> Check PAYLOAD data")
 
         # Makes the HTTP requests
         status = 400
         attempts = 0
         while status >= 400 and attempts <= 5:
             print("send message: ", payload)
-
-            self._com_handler.send_data(SIM_CARD_COMMANDS["SET_HTTP_DATA"])
-            self._com_handler.send_data(payload)
-            time.sleep(1)  # depends on waiting
-            # upload data to ubitots:
-            self._com_handler.send_data(SIM_CARD_COMMANDS["SEND_POST_REQ"])
-            time.sleep(0.5)  # depends on receive data time
-            # filter http status code
-            received_data_buffer = self._com_handler.receive_data()
-            m = re.search(DATA_RESPONSE_REGEX, received_data_buffer, re.MULTILINE)
-            status = int(m.group(1))  # convert from string to int e.g '200' -> 200
-
+            try:
+                self._com_handler.send_data(SIM_CARD_COMMANDS["SET_HTTP_DATA"])
+                self._com_handler.send_data(payload)
+                time.sleep(1)  # depends on waiting
+                # upload data to ubitots:
+                self._com_handler.send_data(SIM_CARD_COMMANDS["SEND_POST_REQ"])
+                time.sleep(5)  # depends on receive data time
+                # filter http status code
+                received_data_buffer = self._com_handler.receive_data()
+                time.sleep(2)  # depends on receive data time
+                m = re.search(DATA_RESPONSE_REGEX, received_data_buffer, re.MULTILINE)
+                status = int(m.group(1))  # convert from string to int e.g '200' -> 200
+            except Exception:
+                status = 400
             attempts += 1
             time.sleep(1)
 
@@ -126,19 +142,7 @@ class UbiApi:
             print("[INFO] request made properly, your device is updated")
         return True
 
-
-'''
-def main():
-    payload = build_payload(
-        VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3)
-
-    print("[INFO] Attemping to send data")
-    post_request(payload)
-    print("[INFO] finished")
-
-
-if __name__ == '__main__':
-    while (True):
-        main()
-        time.sleep(1)
-'''
+    # Deleting (Calling destructor)
+    def __del__(self):
+        self._com_handler.send_data(SIM_CARD_COMMANDS["CLOSE_GPRS_CONTEXT"], check_response=True)
+        print('Destructor called, Employee deleted.')
