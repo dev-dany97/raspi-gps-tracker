@@ -3,12 +3,15 @@
 # author: d.mohles
 # This lib provides Serial Port functionality
 
-from serial import Serial, SerialException
-import time
 import re
-#from termcolor import colored
+import time
+
+from serial import Serial, SerialException
 
 from constants import BAUDRATE, COMMON_PORT_NAME, W_TIMEOUT, R_TIMEOUT, ENTER_KEY, bcolors, ERROR_STRING, OK_STRING
+
+
+# from termcolor import colored
 
 
 class UART(object):
@@ -22,6 +25,7 @@ class UART(object):
         """
         Init UART
         """
+        self.last_send_data = ""
         self.read_buffer = ""
         self.ser = Serial(port=COMMON_PORT_NAME, baudrate=BAUDRATE, write_timeout=W_TIMEOUT, timeout=R_TIMEOUT)
         if not self.port_is_open():
@@ -70,6 +74,7 @@ class UART(object):
         :return: status (True: successfully; False: Failed)
         :rtype: bool
         """
+        self.last_send_data = data
         data_buffer = data + ENTER_KEY  # 'data_string' + '\r\n'
         # try until response
         response = False
@@ -118,11 +123,11 @@ class UART(object):
             # answer didn't matched
             return False
 
-    def receive_data(self):
+    def receive_data(self, equal_value=None):
         """
         Receive data on UART interface
-        :return: read_buffer
-        :rtype: ascii string
+        :return: read_buffer data or True/False if buffer is compared with equal_value
+        :rtype: ascii string or bool
         """
         self.read_buffer = ""
         try:
@@ -133,7 +138,37 @@ class UART(object):
             print(f"{bcolors.ERROR}[ERROR] READ DATA FAILED: {e}{bcolors.ENDC}")
             self.read_buffer = None
         print(f"{bcolors.RECEIVER}[INFO] RECEIVED DATA: {self.convert_to_ascii_format(self.read_buffer)}{bcolors.ENDC}")
+        if equal_value:
+            expected_pattern = re.compile(r''.join(self.last_send_data + '\r\r\n' + equal_value))
+            expected_pattern.match(self.read_buffer)
+            if expected_pattern.match(self.read_buffer):
+                return True
         return self.read_buffer
+
+    def send_sms(self, msg):
+        """
+
+        :return:
+        """
+        W_buff = ["AT\r\n", "AT+CMGF=1\r\n", "AT+CSCA=\"+447797704000\"\r\n", "AT+CMGS=\"+49XXXXXXXXXX\"\r\n", msg]
+        self.ser.write(W_buff[0].encode())
+        self.ser.flushInput()
+        data = ""
+        num = 0
+
+        self.send_data("AT+CMGF=1", check_response=True)
+        self.send_data("AT+CSCA=\"+447797704000\"", check_response=True)
+        self.send_data("AT+CMGS=\"+49XXXXXXXXXX\"")
+
+        while True:
+            while self.ser.inWaiting() > 0:
+                data += str(self.ser.read(self.ser.inWaiting()))
+            if data != "" and data.count(">") > 0:
+                time.sleep(0.5)
+                self.ser.write(msg.encode())
+                self.ser.write("\x1a\r\n".encode())  # 0x1a : send   0x1b : Cancel send
+                break
+            data = ""
 
     def close_connection(self):
         """

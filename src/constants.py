@@ -12,7 +12,7 @@ OK_STRING = 'OK' + ENTER_KEY
 
 # SIM Card constants (GPRS Commands)
 SIM_CARD_COMMANDS = {
-    "GPRS_NET_LOG_IN": "AT+CGATT",  # GPRS-Netz eingebucht? (1 -> eingebucht, 0 -> nicht eingebucht)
+    "GPRS_NET_LOG_IN": "AT+CGATT?",  # GPRS-Netz eingebucht? (1 -> eingebucht, 0 -> nicht eingebucht)
     "SET_APN": "AT+SAPBR=3,1,\"APN\",\"TM\"",
     "OPEN_GPRS_CONTEXT": "AT+SAPBR=1,1",  # GPRS-Kontext öffnen; LED blinkt dann sehr rasch
     "USER_REQUEST": "AT+SAPBR=2,1",  # Nutzer-Anfrage

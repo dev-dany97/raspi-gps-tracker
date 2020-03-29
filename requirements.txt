@@ -4,6 +4,7 @@ python-dateutil
 pyserial
 requests
 json
+threading
 # this file also contains pip "meta" requirements (packages which are needed to build and test this package, they are NOT used in setup.py)
 pycodestyle
 pylint
