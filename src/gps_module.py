@@ -4,13 +4,13 @@
 # This lib provides GNSS functionality for GNSS module
 
 import datetime
-
 import re
 import time
 from datetime import datetime
-from dateutil import tz
-from constants import CGNSINF_Struct, GPS_COMMANDS, bcolors, GNGGA, GNRMC, GPS_STATUS
 
+from dateutil import tz
+
+from constants import CGNSINF_Struct, GPS_COMMANDS, bcolors, GNGGA, GNRMC, GPS_STATUS
 
 gnss_data_struct_pattern = r"(CGNSINF: (1|0),(1|0),(.{18}),([0-9.]{0,10}),([0-9.]{0,11}),([0-9.]{0,8}),([0-9.]{0,6})," \
                            r"([0-9.]{0,6}),(0|1|2),([\w\d.]*),([0-9.]{0,4}),([0-9.]{0,4}),([0-9.]{0,4}),([\w\d.]*)," \
@@ -107,8 +107,6 @@ class GPS:
 
         :return:
         """
-        self.stop_command = False
-        self._enable_gps_module()
         try:
             while not self.stop_command:
                 self._get_gps_infos()
@@ -119,6 +117,15 @@ class GPS:
             #    self.get_gnss_nav_infos()
         finally:
             self._disable_gps_module()
+
+    def start(self):
+        """
+
+        :return:
+        """
+        self.stop_command = False
+        self._enable_gps_module()
+        self.run()
 
     def stop(self):
         """
@@ -166,26 +173,29 @@ class GPS:
         data_buffer = self.com_handler.receive_data()
         # read latitude and longitude
         gngga_data = re.search(GNGGA, data_buffer)
-        if gngga_data is not None:
-            print("---Parsing GNGGA---")
-            if gngga_data.group(2) == '$GNGGA':
-                utc_time = gngga_data.group(3)  # summer time!!!
-                lat = gngga_data.group(4)
-                self.msg_block.lat = convert_nmea_to_dec(lat)
-                long = gngga_data.group(6)
-                self.msg_block.lng = convert_nmea_to_dec(long)
-            else:
-                print("wrong 'GNGGA' data format!")
-        # read time and date
         gnrmc_data = re.search(GNRMC, data_buffer)
-        if gnrmc_data is not None:
-            print("---Parsing GNRMC---")
-            if gnrmc_data.group(2) == '$GNRMC':
-                date = gnrmc_data.group(11)
-            else:
-                print("wrong 'GNRMC' data format!")
-        if date is not None and time is not None:
-            self.msg_block.timestamp = convert_utc_date_time(utc_time=utc_time, date=date)
+        try:
+            if gngga_data is not None:
+                print("---Parsing GNGGA---")
+                if gngga_data.group(2) == '$GNGGA':
+                    utc_time = gngga_data.group(3)  # summer time!!!
+                    lat = gngga_data.group(4)
+                    self.msg_block.lat = convert_nmea_to_dec(lat)
+                    long = gngga_data.group(6)
+                    self.msg_block.lng = convert_nmea_to_dec(long)
+                else:
+                    print("wrong 'GNGGA' data format!")
+            # read time and date
+            if gnrmc_data is not None:
+                print("---Parsing GNRMC---")
+                if gnrmc_data.group(2) == '$GNRMC':
+                    date = gnrmc_data.group(11)
+                else:
+                    print("wrong 'GNRMC' data format!")
+            if date is not None and time is not None:
+                self.msg_block.timestamp = convert_utc_date_time(utc_time=utc_time, date=date)
+        except:
+            print("[INFO] no satellite found!")
         return bool(gngga_data and gnrmc_data)
 
     def get_gnss_nav_infos(self):
@@ -209,3 +219,9 @@ class GPS:
             print("GLONASS Satellites in View = " + gps_data[CGNSINF_Struct.glonass_satellites_in_view])
             print("Speed = " + gps_data[CGNSINF_Struct.speed_over_ground])
             print("Course = " + gps_data[CGNSINF_Struct.course_over_ground])
+
+    # Deleting (Calling destructor)
+    def __del__(self):
+        self.stop()
+        time.sleep(5)  # wait for finishing
+        print('Destructor called, Employee deleted.')
