@@ -1,5 +1,6 @@
 # version: 1.0.0
 # dependencies of this package (they are also used in setup.py)
+typing # need for python 2
 python-dateutil
 pyserial
 requests

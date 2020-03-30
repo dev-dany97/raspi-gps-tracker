@@ -1,10 +1,15 @@
+# coding=utf-8
 from pip._internal.utils.misc import enum
+
+##### IMPORTANT SETTINGS ######
+from typing import Dict, Any, Union
 
 BAUDRATE = 115200  # UART communication bus baud rate
 GPS_BAUDRATE = 115200
 W_TIMEOUT = 10  # write timeout in sec
 R_TIMEOUT = 15  # read timeout in sec
-COMMON_PORT_NAME = "COM3"  # "/dev/ttyS0"  # Raspi Pi Zero
+# COMMON_PORT_NAME = "COM3"  # mostly on Windows systems
+COMMON_PORT_NAME = "/dev/ttyS0"  # The user UART device of Raspberry Pi 2B/Zero is ttyAMA0, and ttyS0 of Raspberry Pi 3B
 ENTER_KEY = '\r\n'
 
 ERROR_STRING = 'ERROR' + ENTER_KEY
@@ -14,7 +19,7 @@ OK_STRING = 'OK' + ENTER_KEY
 SIM_CARD_COMMANDS = {
     "GPRS_NET_LOG_IN": "AT+CGATT?",  # GPRS-Netz eingebucht? (1 -> eingebucht, 0 -> nicht eingebucht)
     "SET_APN": "AT+SAPBR=3,1,\"APN\",\"TM\"",
-    "OPEN_GPRS_CONTEXT": "AT+SAPBR=1,1",  # GPRS-Kontext öffnen; LED blinkt dann sehr rasch
+    "OPEN_GPRS_CONTEXT": "AT+SAPBR=1,1",  # GPRS-Kontext oeffnen; LED blinkt dann sehr rasch
     "USER_REQUEST": "AT+SAPBR=2,1",  # Nutzer-Anfrage
     "INIT_HHTP_SERVICE": "AT+HTTPINIT",  # HTTP-Dienst initialisieren
     "SET_HTTP_URL": "AT+HTTPPARA=\"URL\",\"http://industrial.api.ubidots.com/api/v1.6/devices/raspberryPiGPSTracker\"",
@@ -30,8 +35,8 @@ SIM_CARD_COMMANDS = {
     "SEND_POST_REQ": "AT+HTTPACTION=1",  # Upload starten (1->POST)
     "READ_HTTP_ANSWER": "AT+HTTPREAD",  # Antwort des HTTP-Servers lesen
     "SHUTDOWN_HTTP_SERVICE": "AT+HTTPTERM",  # HTTP-Dienst beenden
-    "CLOSE_GPRS_CONTEXT": "AT+SAPBR=0,1"  # GPRS-Kontext schließen; LED blinkt dann wieder im 3-s-Rhythmus
-}
+    "CLOSE_GPRS_CONTEXT": "AT+SAPBR=0,1"  # GPRS-Kontext schliessen; LED blinkt dann wieder im 3-s-Rhythmus
+}  # type: Dict[Union[str, Any], Union[str, Any]]
 
 # GPS constants
 CGNSINF_Struct = enum('all_data', 'gnss_run_status', 'fix_status', 'utc_date_time', 'latitude', 'longitude',
@@ -53,8 +58,8 @@ GPS_COMMANDS = {
 }
 
 GPS_STATUS = {
-  'ON': 1,
-  'OFF': 0
+    'ON': 1,
+    'OFF': 0
 }
 
 INTRO_HEADER = '''
@@ -96,10 +101,8 @@ GPGSV = '((\$GPGSV),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),
 GNVTG = '((\$GNVTG),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*)(\\r\\n))'
 GNRMC = '((\$GNRMC),([0-9.]{0,10}),(.*),([0-9.]{0,11}),([N,S]?),([0-9.]{0,12}),([E,W]?),(.*),(.*),(.*),(.*),(.*),(.*)(\\r\\n\$GNVTG))'
 
-
 # READ data response <HTTP method specification, HTTP Status Code ,data length>
 DATA_RESPONSE_REGEX = '\\+HTTPACTION: 1,([0-9]{3}),([0-9]*)'
-
 
 # APN data
 GPRS_APN = "TN"  # replace with your GPRS APN

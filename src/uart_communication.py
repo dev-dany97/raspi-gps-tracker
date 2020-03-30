@@ -1,10 +1,12 @@
 #!/usr/local/bin/python3.8
+# coding=utf-8
 # Filename: uart_communication.py
 # author: d.mohles
 # This lib provides Serial Port functionality
 
 import re
 import time
+import logging
 
 from serial import Serial, SerialException
 
@@ -29,7 +31,7 @@ class UART(object):
         self.read_buffer = ""
         self.ser = Serial(port=COMMON_PORT_NAME, baudrate=BAUDRATE, write_timeout=W_TIMEOUT, timeout=R_TIMEOUT)
         if not self.port_is_open():
-            self.open_connection()
+            self.open_connection
 
     def convert_to_ascii_format(self, normal_text):
         """
@@ -41,6 +43,7 @@ class UART(object):
         ascii_text = normal_text.replace('\n', '\\n')
         return ascii_text
 
+    @property
     def open_connection(self):
         """
         Opens SerialPort connection
@@ -52,7 +55,7 @@ class UART(object):
                 return True
             self.ser.open()
         except SerialException as e:
-            print("Port couldn't be open: ", e)
+            logging.error("Port couldn't be open: ", e.message)
             return False
         return True
 
@@ -65,7 +68,7 @@ class UART(object):
         try:
             return self.ser.is_open
         except Exception as e:
-            print("SEND Status can't be read: ", e)
+            logging.error("SEND Status can't be read: ", e.message)
             return False
 
     def send_data(self, data, check_response=False):
@@ -83,7 +86,7 @@ class UART(object):
                 self.read_buffer = ""
                 self.ser.reset_input_buffer()  # Flush input buffer, discarding all its contents.
                 self.ser.write(data_buffer.encode())
-                print(f"{bcolors.SENDER}[INFO] SEND DATA: {self.convert_to_ascii_format(data)}{bcolors.ENDC}")
+                logging.info("SEND DATA: %s" % self.convert_to_ascii_format(data))
                 time.sleep(0.5)  # secure time sleep
                 # check response
                 if check_response:
@@ -91,15 +94,13 @@ class UART(object):
                     negative_response = data + '\r' + ENTER_KEY + ERROR_STRING
                     response = self.receive_data()
                     if response == positive_response:
-                        print(
-                            f"{bcolors.RECEIVER}[INFO] OK response{bcolors.ENDC}")
+                        logging.info('OK response')
                         response = True
                     elif response == negative_response:
                         self.negative_response_counter += 1
                         if self.negative_response_counter >= self.max_negative_response_counter:
                             return False
-                        print(
-                            f"{bcolors.RECEIVER}[INFO] ERROR response{bcolors.ENDC}")
+                        logging.error('ERROR response')
                         response = True
                     else:
                         response = False
@@ -107,7 +108,7 @@ class UART(object):
                     # if no response is expected
                     break
             except Exception as e:
-                print(f"{bcolors.ERROR}[ERROR] SEND DATA FAILED: {e}{bcolors.ENDC}")
+                logging.error('SEND DATA FAILED: ', e.message)
                 return False
 
     def check_response_in_data_flow(self, data):
@@ -134,10 +135,9 @@ class UART(object):
             while self.ser.inWaiting() > 0:
                 self.read_buffer += self.ser.read(self.ser.inWaiting()).decode("utf-8")
         except Exception as e:
-            print("[ERROR] READ DATA FAILED: ", e)
-            print(f"{bcolors.ERROR}[ERROR] READ DATA FAILED: {e}{bcolors.ENDC}")
+            logging.error("READ DATA FAILED: ", e.message)
             self.read_buffer = None
-        print(f"{bcolors.RECEIVER}[INFO] RECEIVED DATA: {self.convert_to_ascii_format(self.read_buffer)}{bcolors.ENDC}")
+        logging.info('RECEIVED DATA: %s' % self.convert_to_ascii_format(self.read_buffer))
         if equal_value:
             expected_pattern = re.compile(r''.join(self.last_send_data + '\r\r\n' + equal_value))
             expected_pattern.match(self.read_buffer)
@@ -180,5 +180,5 @@ class UART(object):
             self.ser.close()
             return True
         except Exception as e:
-            print("Port couldn't be closed: ", e)
+            logging.error("Port couldn't be closed: ", e.message)
             return False

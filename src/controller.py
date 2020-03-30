@@ -6,12 +6,13 @@ import logging
 import sys
 import threading
 from datetime import datetime, timedelta
-from time import sleep
+from time import sleep, strftime
 
 from serial import SerialException
 
 from constants import INTRO_HEADER
 from gps_module import GPS
+from gsm_pwrkey import start_board
 from message import Message
 from uart_communication import UART
 from ubi_api import UbiApi
@@ -27,7 +28,7 @@ def main():
     last_timestamp = datetime.now()
 
     format = "%(asctime)s[%(levelname)s]: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+    logging.basicConfig(format=format, level=logging.DEBUG, datefmt="%H:%M:%S")
 
     print(INTRO_HEADER)
     com_handler = None
@@ -35,16 +36,22 @@ def main():
     msg_block = Message()
     # open Serial Port communication
     connecetion_established = False
+    connection_timeout = 0
     while not connecetion_established:
         try:
             com_handler = UART()
             connecetion_established = True
         except SerialException as e:
-            logging.info("wait for connection...")
-            logging.debug("wait for connection... Message:", e)
-            sleep(5)
+            connection_timeout += 1
+            if connection_timeout == 1:
+                start_board()
+            sys.stdout.write(
+                '\r{0}[INFO]: wait for connection...{1}'.format(strftime("%H:%M:%S"), '.' * connection_timeout))
+            logging.debug("\nSerial Port Problem: %s" % e.strerror)
         except Exception as e:
-            logging.critical("Connection Problem: ", e)
+            connecetion_established = False
+            logging.error("\nConnection Problem: %s" % e.message)
+        finally:
             sleep(5)
     logging.info("connection established!")
     com_handler.send_data("AT", check_response=True)

@@ -6,6 +6,7 @@ import json
 import random
 import re
 import time
+import logging
 
 import requests
 
@@ -56,9 +57,9 @@ class UbiApi:
         :return:
         """
         payload = self._build_payload()
-        print("[INFO] Attemping to send data")
+        logging.info("Attemping to send data")
         self._post_request_by_module(payload)
-        print("[INFO] finished")
+        logging.info("finished")
 
     def _build_payload(self):
         """
@@ -88,7 +89,7 @@ class UbiApi:
         status = 400
         attempts = 0
         while status >= 400 and attempts <= 5:
-            print("send message: ", payload)
+            logging.info("send message: %s" % payload)
             req = requests.post(url=url, headers=headers, json=payload)
             status = req.status_code
             attempts += 1
@@ -106,13 +107,13 @@ class UbiApi:
         except TypeError:
             payload = json.dumps(payload)
             if not json.loads(payload):
-                raise ("Cannot convert payload to valid JSON format! -> Check PAYLOAD data")
+                raise Exception("Cannot convert payload to valid JSON format! -> Check PAYLOAD data")
 
         # Makes the HTTP requests
         status = 400
         attempts = 0
         while status >= 400 and attempts <= 5:
-            print("send message: ", payload)
+            logging.info("send message: %s" % str(payload))
             try:
                 self._com_handler.send_data(SIM_CARD_COMMANDS["SET_HTTP_DATA"])
                 self._com_handler.send_data(payload)
@@ -133,16 +134,16 @@ class UbiApi:
         # Processes results
         # more response codes: https://www.waveshare.com/w/upload/2/20/SIM800_Series_AT_Command_Manual_V1.09.pdf
         if status >= 400:
-            print("[ERROR] Could not send data after 5 attempts, please check \
+            logging.error("Could not send data after 5 attempts, please check \
                             your token credentials and internet connection")
             return False
         if status == 200:
-            print("[INFO] request successfully updated")
+            logging.info("request successfully updated")
         else:
-            print("[INFO] request made properly, your device is updated")
+            logging.info("request made properly, your device is updated")
         return True
 
     # Deleting (Calling destructor)
     def __del__(self):
         self._com_handler.send_data(SIM_CARD_COMMANDS["CLOSE_GPRS_CONTEXT"], check_response=True)
-        print('Destructor called, Employee deleted.')
+        logging.debug('Destructor called, Employee deleted.')

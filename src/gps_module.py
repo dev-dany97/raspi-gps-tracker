@@ -6,6 +6,7 @@
 import datetime
 import re
 import time
+import logging
 from datetime import datetime
 
 from dateutil import tz
@@ -76,9 +77,9 @@ def convert_nmea_to_dec(coord):
         min = head[-2:]
         # LatDec = DD + SS/60
         coord_deg = int(deg) + float(coord[-9:])/60
-        print("[DEBUG] coordinate: " + deg + " deg " + min + "." + tail + " min")
+        logging.debug("coordinate: " + deg + " deg " + min + "." + tail + " min")
     except Exception as e:
-        print("[ERROR] can't convert coordinates because of: ", e)
+        logging.error("can't convert coordinates because of: ", e)
         return None
     return coord_deg
 
@@ -176,7 +177,7 @@ class GPS:
         gnrmc_data = re.search(GNRMC, data_buffer)
         try:
             if gngga_data is not None:
-                print("---Parsing GNGGA---")
+                logging.debug("---Parsing GNGGA---")
                 if gngga_data.group(2) == '$GNGGA':
                     utc_time = gngga_data.group(3)  # summer time!!!
                     lat = gngga_data.group(4)
@@ -184,18 +185,18 @@ class GPS:
                     long = gngga_data.group(6)
                     self.msg_block.lng = convert_nmea_to_dec(long)
                 else:
-                    print("wrong 'GNGGA' data format!")
+                    logging.error("wrong 'GNGGA' data format!")
             # read time and date
             if gnrmc_data is not None:
-                print("---Parsing GNRMC---")
+                logging.debug("---Parsing GNRMC---")
                 if gnrmc_data.group(2) == '$GNRMC':
                     date = gnrmc_data.group(11)
                 else:
-                    print("wrong 'GNRMC' data format!")
+                    logging.error("wrong 'GNRMC' data format!")
             if date is not None and time is not None:
                 self.msg_block.timestamp = convert_utc_date_time(utc_time=utc_time, date=date)
         except:
-            print("[INFO] no satellite found!")
+            logging.info("no satellite found!")
         return bool(gngga_data and gnrmc_data)
 
     def get_gnss_nav_infos(self):
@@ -208,20 +209,20 @@ class GPS:
         data = self.com_handler.receive_data()
         gps_matches = re.findall(gnss_data_struct_pattern, data)
         if len(gps_matches) == 0:
-            print(f"{bcolors.ERROR}[ERROR] No GPS Signal!{bcolors.ENDC}")
+            logging.error("[ERROR] No GPS Signal!")
         for gps_data in gps_matches:
-            print("---------------------------------------------")
-            print("UTC Date Time = " + str(convert_utc_time(gps_data[CGNSINF_Struct.utc_date_time])))
-            print("Latitude is = " + gps_data[CGNSINF_Struct.latitude])
-            print("Longitude is = " + gps_data[CGNSINF_Struct.longitude])
-            print("GPS Satellites in View = " + gps_data[CGNSINF_Struct.gps_satellites_in_view])
-            print("GNSS Satellites Used = " + gps_data[CGNSINF_Struct.gnss_satellites_used])
-            print("GLONASS Satellites in View = " + gps_data[CGNSINF_Struct.glonass_satellites_in_view])
-            print("Speed = " + gps_data[CGNSINF_Struct.speed_over_ground])
-            print("Course = " + gps_data[CGNSINF_Struct.course_over_ground])
+            logging.debug("---------------------------------------------")
+            logging.debug("UTC Date Time = %s" % convert_utc_time(gps_data[CGNSINF_Struct.utc_date_time]))
+            logging.debug("Latitude is = %s" % gps_data[CGNSINF_Struct.latitude])
+            logging.debug("Longitude is = %s" % gps_data[CGNSINF_Struct.longitude])
+            logging.debug("GPS Satellites in View = %s" % gps_data[CGNSINF_Struct.gps_satellites_in_view])
+            logging.debug("GNSS Satellites Used = %s" % gps_data[CGNSINF_Struct.gnss_satellites_used])
+            logging.debug("GLONASS Satellites in View = %s" % gps_data[CGNSINF_Struct.glonass_satellites_in_view])
+            logging.debug("Speed = %s" % gps_data[CGNSINF_Struct.speed_over_ground])
+            logging.debug("Course = %s" % gps_data[CGNSINF_Struct.course_over_ground])
 
     # Deleting (Calling destructor)
     def __del__(self):
         self.stop()
         time.sleep(5)  # wait for finishing
-        print('Destructor called, Employee deleted.')
+        logging.debug('Destructor called, Employee deleted.')
