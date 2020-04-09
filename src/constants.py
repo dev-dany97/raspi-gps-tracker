@@ -2,7 +2,7 @@
 from pip._internal.utils.misc import enum
 
 ##### IMPORTANT SETTINGS ######
-from typing import Dict, Any, Union
+#from typing import Dict, Any, Union
 
 BAUDRATE = 115200  # UART communication bus baud rate
 GPS_BAUDRATE = 115200

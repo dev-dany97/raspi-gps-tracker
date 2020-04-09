@@ -95,7 +95,7 @@ class UART(object):
                     response = self.receive_data()
                     if response == positive_response:
                         logging.info('OK response')
-                        response = True
+                        return True
                     elif response == negative_response:
                         self.negative_response_counter += 1
                         if self.negative_response_counter >= self.max_negative_response_counter:
@@ -103,7 +103,7 @@ class UART(object):
                         logging.error('ERROR response')
                         response = True
                     else:
-                        response = False
+                        return False
                 else:
                     # if no response is expected
                     break

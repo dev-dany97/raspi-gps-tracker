@@ -37,24 +37,30 @@ def main():
     # open Serial Port communication
     connecetion_established = False
     connection_timeout = 0
+    board_started = False
     while not connecetion_established:
         try:
             com_handler = UART()
             connecetion_established = True
         except SerialException as e:
             connection_timeout += 1
-            if connection_timeout == 1:
-                start_board()
             sys.stdout.write(
                 '\r{0}[INFO]: wait for connection...{1}'.format(strftime("%H:%M:%S"), '.' * connection_timeout))
             logging.debug("\nSerial Port Problem: %s" % e.strerror)
+            sleep(5)
         except Exception as e:
             connecetion_established = False
             logging.error("\nConnection Problem: %s" % e.message)
-        finally:
             sleep(5)
+
+    while not com_handler.send_data("AT", check_response=True):
+        if not board_started:
+            #logging.info("start board...")
+            #start_board()
+            board_started = True
+            #logging.info("board started!")
+        logging.info("wait for answer...")
     logging.info("connection established!")
-    com_handler.send_data("AT", check_response=True)
 
     # init handlers
     gps_handler = GPS(com_handler, msg_block)
