@@ -1,15 +1,13 @@
 # coding=utf-8
-from pip._internal.utils.misc import enum
 
 ##### IMPORTANT SETTINGS ######
-#from typing import Dict, Any, Union
-
-BAUDRATE = 115200  # UART communication bus baud rate
+BAUDRATE = 9600  # UART communication bus baud rate
 GPS_BAUDRATE = 115200
 W_TIMEOUT = 10  # write timeout in sec
 R_TIMEOUT = 15  # read timeout in sec
 # COMMON_PORT_NAME = "COM3"  # mostly on Windows systems
-COMMON_PORT_NAME = "/dev/ttyS0"  # The user UART device of Raspberry Pi 2B/Zero is ttyAMA0, and ttyS0 of Raspberry Pi 3B
+# COMMON_PORT_NAME = "/dev/ttyS0"  # The user UART device of Raspberry Pi 2B/Zero is ttyAMA0, and ttyS0 of Raspberry Pi 3B
+COMMON_PORT_NAME = "/dev/ttyAMA0"  # The user UART device of Raspberry Pi 2B/Zero is ttyAMA0, and ttyS0 of Raspberry Pi 3B
 ENTER_KEY = '\r\n'
 
 ERROR_STRING = 'ERROR' + ENTER_KEY
@@ -36,13 +34,13 @@ SIM_CARD_COMMANDS = {
     "READ_HTTP_ANSWER": "AT+HTTPREAD",  # Antwort des HTTP-Servers lesen
     "SHUTDOWN_HTTP_SERVICE": "AT+HTTPTERM",  # HTTP-Dienst beenden
     "CLOSE_GPRS_CONTEXT": "AT+SAPBR=0,1"  # GPRS-Kontext schliessen; LED blinkt dann wieder im 3-s-Rhythmus
-}  # type: Dict[Union[str, Any], Union[str, Any]]
+}
 
 # GPS constants
-CGNSINF_Struct = enum('all_data', 'gnss_run_status', 'fix_status', 'utc_date_time', 'latitude', 'longitude',
-                      'msl_altitude', 'speed_over_ground', 'course_over_ground', 'fix_mode', 'reserved1', 'hdop',
-                      'pdop', 'vdop', 'reserved2', 'gps_satellites_in_view', 'gnss_satellites_used',
-                      'glonass_satellites_in_view', 'reserved3', 'c_n0_max', 'hpa', 'vpa')
+CGNSINF_Struct = ('all_data', 'gnss_run_status', 'fix_status', 'utc_date_time', 'latitude', 'longitude',
+                  'msl_altitude', 'speed_over_ground', 'course_over_ground', 'fix_mode', 'reserved1', 'hdop',
+                  'pdop', 'vdop', 'reserved2', 'gps_satellites_in_view', 'gnss_satellites_used',
+                  'glonass_satellites_in_view', 'reserved3', 'c_n0_max', 'hpa', 'vpa')
 
 GPS_COMMANDS = {
     "GPS_POWER_ON": "AT+CGNSPWR=1",  # Turn on the power of GPS
