@@ -76,10 +76,10 @@ def convert_nmea_to_dec(coord):
         deg = head[0:-2]
         min = head[-2:]
         # LatDec = DD + SS/60
-        coord_deg = int(deg) + float(coord[-9:])/60
-        logging.debug("coordinate: " + deg + " deg " + min + "." + tail + " min")
+        coord_deg = int(deg) + float(coord[-9:]) / 60
+        logging.info("coordinate: " + deg + " deg " + min + "." + tail + " min")
     except Exception as e:
-        logging.error("can't convert coordinates because of: ", e)
+        logging.error("can't convert coordinates because of: %s" % e.args)
         return None
     return coord_deg
 
@@ -195,8 +195,8 @@ class GPS:
                     logging.error("wrong 'GNRMC' data format!")
             if date is not None and time is not None:
                 self.msg_block.timestamp = convert_utc_date_time(utc_time=utc_time, date=date)
-        except:
-            logging.info("no satellite found!")
+        except Exception:
+            logging.warning("no satellite found!")
         return bool(gngga_data and gnrmc_data)
 
     def get_gnss_nav_infos(self):
@@ -225,4 +225,4 @@ class GPS:
     def __del__(self):
         self.stop()
         time.sleep(5)  # wait for finishing
-        logging.debug('Destructor called, Employee deleted.')
+        logging.debug('Destructor called, Thread deleted.')

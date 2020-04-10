@@ -146,4 +146,4 @@ class UbiApi:
     # Deleting (Calling destructor)
     def __del__(self):
         self._com_handler.send_data(SIM_CARD_COMMANDS["CLOSE_GPRS_CONTEXT"], check_response=True)
-        logging.debug('Destructor called, Employee deleted.')
+        logging.debug('Close GPRS context.')
