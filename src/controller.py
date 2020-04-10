@@ -10,7 +10,7 @@ from time import sleep, strftime
 
 from serial import SerialException
 
-from constants import INTRO_HEADER
+from constants import INTRO_HEADER, GPS_COMMANDS
 from gps_module import GPS
 from gsm_pwrkey import start_board
 from message import Message
@@ -26,9 +26,10 @@ def main():
     lat_old = 0
     lng_old = 0
     last_timestamp = datetime.now()
+    last_coordinate_timestamp = datetime.now()
 
     format = "%(asctime)s[%(levelname)s]: %(message)s"
-    logging.basicConfig(format=format, level=logging.DEBUG, datefmt="%H:%M:%S")
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
     print(INTRO_HEADER)
     com_handler = None
@@ -50,15 +51,18 @@ def main():
             sleep(5)
         except Exception as e:
             connecetion_established = False
-            logging.error("\nConnection Problem: %s" % e.message)
+            logging.error("\nConnection Problem: %s" % e)
             sleep(5)
+    # disable disable gps module
+    com_handler.send_data(GPS_COMMANDS["GPS_POWER_OFF"])
+    com_handler.check_response_in_data_flow(GPS_COMMANDS["GPS_POWER_OFF"])
 
     while not com_handler.send_data("AT", check_response=True):
         if not board_started:
-            #logging.info("start board...")
-            #start_board()
+            logging.info("start board...")
+            start_board()
             board_started = True
-            #logging.info("board started!")
+            logging.info("board started!")
         logging.info("wait for answer...")
     logging.info("connection established!")
 
@@ -78,17 +82,30 @@ def main():
             if msg_block.lat and msg_block.lng:
                 # Check if data was updated:
                 if lat_old != float("{:.2f}".format(msg_block.lat)) or lng_old != float("{:.2f}".format(msg_block.lng)):
+                    logging.info("LAT or LNG changed!")
                     # set new values to old values
                     lat_old = float("{:.2f}".format(msg_block.lat))
                     lng_old = float("{:.2f}".format(msg_block.lng))
-                    logging.debug("GPS Latitude: " + str(msg_block.lat))
-                    logging.debug("GPS Longitude: " + str(msg_block.lng))
+                    logging.info("GPS Latitude: " + str(msg_block.lat))
+                    logging.info("GPS Longitude: " + str(msg_block.lng))
                     x2 = threading.Thread(target=gps_handler.stop)
                     x2.start()  # send stop signal
                     x2.join()
                     x.join()
                     upload_handler.upload_data()
                     break
+                if datetime.now() >= last_coordinate_timestamp + timedelta(minutes=2):
+                    last_coordinate_timestamp = datetime.now()
+                    logging.info("Send every 2 minutes:")
+                    logging.info("GPS Latitude: " + str(msg_block.lat))
+                    logging.info("GPS Longitude: " + str(msg_block.lng))
+                    x2 = threading.Thread(target=gps_handler.stop)
+                    x2.start()  # send stop signal
+                    x2.join()
+                    x.join()
+                    upload_handler.upload_data()
+                    break
+
                 if datetime.now() >= last_timestamp + timedelta(days=1):
                     # send every day a status message
                     last_timestamp = datetime.now()
@@ -115,4 +132,14 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    exception_counter = 0
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception as e:
+        logging.fatal("Error: ", e)
+        exception_counter += 1
+        if exception_counter > 3:
+            logging.debug("exception counter:", exception_counter)
+            sys.exit(1)
