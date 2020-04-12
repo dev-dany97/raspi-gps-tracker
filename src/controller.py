@@ -23,8 +23,8 @@ def main():
     Main function (entry point)
     :return:
     """
-    lat_old = 0
-    lng_old = 0
+    last_lat = 0
+    last_lng = 0
     last_timestamp = datetime.now()
     last_coordinate_timestamp = datetime.now()
 
@@ -81,30 +81,21 @@ def main():
             # wait if data is received
             if msg_block.lat and msg_block.lng:
                 # Check if data was updated:
-                if lat_old != float("{:.2f}".format(msg_block.lat)) or lng_old != float("{:.2f}".format(msg_block.lng)):
-                    logging.info("LAT or LNG changed!")
-                    # set new values to old values
-                    lat_old = float("{:.2f}".format(msg_block.lat))
-                    lng_old = float("{:.2f}".format(msg_block.lng))
-                    logging.info("GPS Latitude: " + str(msg_block.lat))
-                    logging.info("GPS Longitude: " + str(msg_block.lng))
-                    x2 = threading.Thread(target=gps_handler.stop)
-                    x2.start()  # send stop signal
-                    x2.join()
-                    x.join()
-                    upload_handler.upload_data()
-                    break
-                if datetime.now() >= last_coordinate_timestamp + timedelta(minutes=2):
-                    last_coordinate_timestamp = datetime.now()
-                    logging.info("Send every 2 minutes:")
-                    logging.info("GPS Latitude: " + str(msg_block.lat))
-                    logging.info("GPS Longitude: " + str(msg_block.lng))
-                    x2 = threading.Thread(target=gps_handler.stop)
-                    x2.start()  # send stop signal
-                    x2.join()
-                    x.join()
-                    upload_handler.upload_data()
-                    break
+                if last_lat != msg_block.lat or last_lng != msg_block.lng:
+                    if datetime.now() >= last_coordinate_timestamp + timedelta(seconds=5):
+                        # set new values to old values
+                        last_lat = msg_block.lat
+                        last_lng = msg_block.lng
+                        logging.info("LAT or LNG changed!")
+                        logging.info("GPS Latitude: " + str(msg_block.lat))
+                        logging.info("GPS Longitude: " + str(msg_block.lng))
+                        x2 = threading.Thread(target=gps_handler.stop)
+                        x2.start()  # send stop signal
+                        x2.join()
+                        x.join()
+                        upload_handler.upload_data()
+                        last_coordinate_timestamp = datetime.now()
+                        break
 
                 if datetime.now() >= last_timestamp + timedelta(days=1):
                     # send every day a status message

@@ -16,6 +16,17 @@ from constants import BAUDRATE, COMMON_PORT_NAME, W_TIMEOUT, R_TIMEOUT, ENTER_KE
 # from termcolor import colored
 
 
+def convert_to_ascii_format(normal_text):
+    """
+    Print ascii chars
+    :return:
+    """
+    normal_text = normal_text.replace('\r', '\\r')
+    normal_text = normal_text.replace('"', '\"')
+    ascii_text = normal_text.replace('\n', '\\n')
+    return ascii_text
+
+
 class UART(object):
     """
     Provide UART Communication functions
@@ -40,17 +51,6 @@ class UART(object):
         self.ser.close()
         time.sleep(3)
         print("Closed?:", self.ser.closed)
-
-    @staticmethod
-    def convert_to_ascii_format(normal_text):
-        """
-        Print ascii chars
-        :return:
-        """
-        normal_text = normal_text.replace('\r', '\\r')
-        normal_text = normal_text.replace('"', '\"')
-        ascii_text = normal_text.replace('\n', '\\n')
-        return ascii_text
 
     def open_connection(self):
         """
@@ -94,7 +94,7 @@ class UART(object):
                 self.read_buffer = ""
                 self.ser.reset_input_buffer()  # Flush input buffer, discarding all its contents.
                 self.ser.write(data_buffer.encode())
-                logging.debug("SEND DATA: %s" % self.convert_to_ascii_format(data))
+                logging.debug("SEND DATA: ", convert_to_ascii_format(data))
                 time.sleep(0.5)  # secure time sleep
                 # check response
                 if check_response:
@@ -117,7 +117,7 @@ class UART(object):
                     # if no response is expected
                     break
             except Exception as e:
-                logging.error("SEND DATA FAILED: %s" % e.args)
+                logging.error("SEND DATA FAILED: ", e.args)
                 return False
 
     def check_response_in_data_flow(self, data):
@@ -126,11 +126,14 @@ class UART(object):
         answer = self.receive_data()
         positive_pattern = re.compile(positive_response_regex)
         negative_pattern = re.compile(negative_response_regex)
-        if positive_pattern.search(answer) or negative_pattern.search(answer):
-            # if answer matched with expected response
-            return True
-        else:
-            # answer didn't matched
+        try:
+            if positive_pattern.search(answer) or negative_pattern.search(answer):
+                # if answer matched with expected response
+                return True
+            else:
+                # answer didn't matched
+                return False
+        except TypeError:
             return False
 
     def receive_data(self, equal_value=None):
@@ -144,9 +147,9 @@ class UART(object):
             while self.ser.inWaiting() > 0:
                 self.read_buffer += self.ser.read(self.ser.inWaiting()).decode("utf-8")
         except Exception as e:
-            logging.error("READ DATA FAILED:", e.args)
-            self.read_buffer = None
-        logging.debug('RECEIVED DATA: %s' % self.convert_to_ascii_format(self.read_buffer))
+            logging.error("READ DATA FAILED:", e)
+            return None
+        logging.debug('RECEIVED DATA: %s' % convert_to_ascii_format(self.read_buffer))
         if equal_value:
             expected_pattern = re.compile(r''.join(self.last_send_data + '\r\r\n' + equal_value))
             expected_pattern.match(self.read_buffer)
