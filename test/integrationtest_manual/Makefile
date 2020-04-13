@@ -11,6 +11,6 @@ test:
 
 # NOTE: this coverage target is not called from the test/Makefile
 coverage:
-	@python -m coverage run --branch --source ../../@@@PACKAGENAME@@@ -m unittest discover
+	@python -m coverage run --branch --source ../../src -m unittest discover
 	@python -m coverage report -m
 	@python -m coverage html

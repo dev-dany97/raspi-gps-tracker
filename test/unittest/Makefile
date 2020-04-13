@@ -10,7 +10,7 @@ test:
 	@python -m unittest discover
 
 coverage:
-	@python -m coverage run --branch --source ../../@@@PACKAGENAME@@@ -m unittest discover
+	@python -m coverage run --branch --source ../../src -m unittest discover
 	@python -m coverage report -m
 
 combine_coverage:
