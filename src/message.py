@@ -1,5 +1,5 @@
 #!/usr/local/bin/python3.8
-# Filename: gps_module.py
+# Filename: message.py
 # author: d.mohles
 # This lib defines the message bus
 

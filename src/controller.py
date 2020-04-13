@@ -1,5 +1,5 @@
 #!/usr/local/bin/python3.8
-# Filename: gps_module.py
+# Filename: controller.py
 # author: d.mohles
 # Script for controlling GSM/GPRS/GNSS HAT
 import logging

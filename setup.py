@@ -60,8 +60,8 @@ setup(
     # classifiers=['Development Status :: 5 - Production/Stable'],
     author='daniel.mohles',
     author_email='daniel_mohles@outlook.de',
-    description='TBD',
-    long_description='TBD',
+    description='GPS tracker for Raspberry Pi with SIM868 GSM/GPRS/GNSS HAT and Ubidots upload',
+    long_description=open('README.md').read(),
     install_requires=get_requirements(PIP_REQUIREMENTS_FILE),
     scripts=['src/dany_raspi_gps_tracker']
 )
