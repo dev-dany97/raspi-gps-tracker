@@ -10,7 +10,7 @@ except ImportError:  # python 2
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'src'))
 
-from gps_module import GPS, convert_nmea_to_dec, convert_utc_date_time
+from gps_module import GPS, convert_nmea_to_dec, convert_utc_date_time, convert_utc_time
 from message import Message
 
 # recorded sample from extra/GPS-LOG.txt (as received from the module, with real CR LF)
@@ -36,6 +36,11 @@ class TestConvertNmeaToDec(unittest.TestCase):
     def test_invalid_coordinate_returns_none(self):
         self.assertIsNone(convert_nmea_to_dec(''))
         self.assertIsNone(convert_nmea_to_dec('abc'))
+
+
+class TestConvertUtcTime(unittest.TestCase):
+    def test_cgnsinf_timestamp(self):
+        self.assertEqual(convert_utc_time('20200314212323.000'), '2020-03-14 21:23:23')
 
 
 class TestConvertUtcDateTime(unittest.TestCase):

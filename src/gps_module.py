@@ -26,7 +26,7 @@ def convert_utc_time(timestamp):
     :return: returns a datetime string
     :rtype: string
     """
-    return str(datetime.datetime.strptime(timestamp, '%Y%m%d%H%M%S.%f'))
+    return str(datetime.strptime(timestamp, '%Y%m%d%H%M%S.%f'))
 
 
 def convert_utc_date_time(utc_time, date):
