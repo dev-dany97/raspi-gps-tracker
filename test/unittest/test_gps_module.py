@@ -1,5 +1,7 @@
 import os
 import sys
+import re
+import time
 import unittest
 from datetime import datetime
 
@@ -10,6 +12,7 @@ except ImportError:  # python 2
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'src'))
 
+from constants import GNGGA, GNRMC
 from gps_module import GPS, convert_nmea_to_dec, convert_utc_date_time, convert_utc_time
 from message import Message
 
@@ -24,6 +27,20 @@ NO_FIX_SAMPLE = '$GNGGA,155214.089,,,,,0,0,,,M,,M,,*51\r\n$GPGSA,A,1,,,,,,,,,,,,
                 '$GLGSA,A,1,,,,,,,,,,,,,,,*02\r\n$GPGSV,1,1,04,29,,,49,18,,,40,21,,,43,31,,,47*73\r\n' \
                 '$GLGSV,1,1,02,83,,,36,82,,,37*67\r\n$GNRMC,155214.089,V,,,,,0.00,0.00,060180,,,N*5B\r\n' \
                 '$GNVTG,0.00,T,,M,0.00,N,0.00,K,N*2C\r\n'
+
+
+class TestNmeaPatterns(unittest.TestCase):
+    def test_patterns_match_sample(self):
+        self.assertEqual(re.search(GNGGA, NMEA_SAMPLE).group(4), '4901.939124')
+        self.assertEqual(re.search(GNRMC, NMEA_SAMPLE).group(11), '220320')
+
+    def test_incomplete_buffer_returns_fast(self):
+        # GNGGA sentence without the following GPGSA sentence -> no match, must not backtrack for ages
+        incomplete = NMEA_SAMPLE.split('$GPGSA')[0] * 5
+        start = time.time()
+        self.assertIsNone(re.search(GNGGA, incomplete))
+        self.assertIsNone(re.search(GNRMC, incomplete))
+        self.assertLess(time.time() - start, 1.0)
 
 
 class TestConvertNmeaToDec(unittest.TestCase):
