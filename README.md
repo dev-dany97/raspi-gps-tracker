@@ -15,10 +15,12 @@ GPS tracker based on a Raspberry Pi and a GSM/GPRS/GNSS HAT (SIM868). The tracke
 
 | Component | Note |
 |---|---|
-| Raspberry Pi (2B, 3B or Zero) | UART has to be enabled |
-| GSM/GPRS/GNSS HAT with SIM868 | connected via UART and GPIO 7 (PWRKEY) |
-| SIM card with data plan | set the APN in `src/constants.py` |
-| GPS antenna | needs open sky for a fix |
+| GSM/GPRS/GNSS HAT with SIM868 | connected via UART and GPIO 7 (PWRKEY), GSM and GNSS antenna |
+| Raspberry Pi | tested with Raspberry Pi Zero W V1.1, UART has to be enabled |
+| Power bank | goobay 5000 mAh |
+| SIM card | Things Mobile IoT SIM (APN `TM`, set in `src/constants.py`) |
+
+![Hardware setup: power bank, SIM868 HAT mounted on the Raspberry Pi, spare HAT and Raspberry Pi Zero W](docs/images/hardware-setup.jpg)
 
 For first tests on a Windows PC, the CP210x USB driver and an AT command tester are included in `extra/`.
 
@@ -91,3 +93,4 @@ The unit tests in `test/unittest/` cover the message bus, the NMEA to decimal co
 cd test/unittest && python -m unittest discover
 cd test/integrationtest_auto && python -m unittest discover
 ```
+
