@@ -2,6 +2,12 @@
 
 GPS tracker based on a Raspberry Pi and a GSM/GPRS/GNSS HAT (SIM868). The tracker reads its position via GNSS, uploads it over the mobile network (GPRS) to the IoT platform [Ubidots](https://ubidots.com) and sends a daily status SMS with its last known location.
 
+## Why a custom tracker?
+
+Before this project I tried a commercial GPS tracker. It did not work reliably and needs a relatively large battery to run for a reasonable time. Building my own tracker on a Raspberry Pi with a SIM868 HAT gives full control over when positions are taken and uploaded, and the data ends up in my own Ubidots dashboard instead of a vendor cloud.
+
+![Opened commercial GPS tracker that was used before](docs/images/commercial-tracker.jpg)
+
 ## Features
 
 - **Positioning:** controls the GNSS module via AT commands (`AT+CGNS...`) and parses the NMEA sentences (`$GNRMC`, `$GNGGA`), including conversion to decimal degrees and local time.
@@ -94,3 +100,13 @@ cd test/unittest && python -m unittest discover
 cd test/integrationtest_auto && python -m unittest discover
 ```
 
+## Roadmap
+
+Version 2 is planned with a focus on power consumption:
+
+- **Solar module** to recharge the battery, so the tracker can run outdoors without manual charging.
+- **ESP microcontroller instead of the Raspberry Pi** to cut the power consumption significantly, e.g. by using deep sleep between position updates.
+
+## License
+
+The source code of this project is licensed under the [MIT License](LICENSE). Third-party files in `extra/` (CP210x driver, AT command tester) are only included for convenience and remain under the licenses of their respective owners.

@@ -55,6 +55,7 @@ def get_requirements(requirements_file):
 setup(
     name='dany_raspi_gps_tracker',
     version='1.0.0',
+    license='MIT',
     classifiers=['Development Status :: 3 - Alpha'],
     # classifiers=['Development Status :: 4 - Beta'],
     # classifiers=['Development Status :: 5 - Production/Stable'],
