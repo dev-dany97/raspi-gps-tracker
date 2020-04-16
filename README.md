@@ -44,9 +44,23 @@ src/
 docs/                    sphinx documentation
 test/                    unit and integration tests
 extra/                   drivers, tools, sample logs, 3D case
+raspi/boot/              boot configuration for the Raspberry Pi (UART setup)
 ```
 
 ## Installation
+
+### Raspberry Pi image
+
+The tracker runs on Raspbian Buster (release 2020-02-13). After flashing the image, replace `config.txt` and `cmdline.txt` on the boot partition with the files from [`raspi/boot/`](raspi/boot). The relevant settings are:
+
+```
+enable_uart=1
+dtoverlay=pi3-miniuart-bt
+```
+
+`enable_uart=1` enables the serial interface, and `pi3-miniuart-bt` moves Bluetooth to the mini UART, so the stable hardware UART `/dev/ttyAMA0` is free for the SIM868 HAT. The serial login console is removed from `cmdline.txt`.
+
+### Python environment
 
 ```bash
 git clone <repo-url>
@@ -55,8 +69,6 @@ python3 -m venv venv
 source venv/bin/activate
 pip install pyserial python-dateutil requests RPi.GPIO
 ```
-
-Enable the serial interface on the Raspberry Pi (`sudo raspi-config` -> Interface Options -> Serial Port: login shell off, hardware UART on).
 
 ## Configuration
 
