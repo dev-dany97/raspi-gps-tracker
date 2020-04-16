@@ -1,14 +1,20 @@
 # Raspi GPS Tracker
 
+[![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-Zero%20W-C51A4A?logo=raspberrypi&logoColor=white)](https://www.raspberrypi.org/)
+[![SIM868](https://img.shields.io/badge/SIM868-GSM%20%7C%20GPRS%20%7C%20GNSS-1f6feb)](https://www.simcom.com/)
+[![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Ubidots](https://img.shields.io/badge/Ubidots-IoT%20platform-2ccce4)](https://ubidots.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 GPS tracker based on a Raspberry Pi and a GSM/GPRS/GNSS HAT (SIM868). The tracker reads its position via GNSS, uploads it over the mobile network (GPRS) to the IoT platform [Ubidots](https://ubidots.com) and sends a daily status SMS with its last known location.
 
 ## Idea
 
-I developed this GPS tracker as a theft protection for my bicycle. If the bike gets stolen, my Ubidots dashboard shows **when and where it was last seen**. Even if the thief finds and switches off the tracker, the last known position and its timestamp remain as a starting point for the search, and the daily status SMS shows that the tracker is still alive.
+I developed this GPS tracker as a theft protection for my bicycle. If the bike gets stolen, my Ubidots dashboard shows **when and where it was last seen**. Even if the thief finds and switches off the tracker, the last known position and its timestamp remain as a starting point for the search and the daily status SMS shows that the tracker is still alive.
 
 ## Why a custom tracker?
 
-Before this project I tried a commercial GPS tracker. It did not work reliably and needs a relatively large battery to run for a reasonable time. Building my own tracker on a Raspberry Pi with a SIM868 HAT gives full control over when positions are taken and uploaded, and the data ends up in my own Ubidots dashboard instead of a vendor cloud.
+Before this project I tried a commercial GPS tracker. It did not work reliably and needs a relatively large battery to run for a reasonable time. Building my own tracker on a Raspberry Pi with a SIM868 HAT gives full control over when positions are taken and uploaded and the data ends up in my own Ubidots dashboard instead of a vendor cloud.
 
 <img src="docs/images/commercial-tracker.jpg" alt="Opened commercial GPS tracker that was used before" width="360">
 
@@ -62,7 +68,7 @@ enable_uart=1
 dtoverlay=pi3-miniuart-bt
 ```
 
-`enable_uart=1` enables the serial interface, and `pi3-miniuart-bt` moves Bluetooth to the mini UART, so the stable hardware UART `/dev/ttyAMA0` is free for the SIM868 HAT. The serial login console is removed from `cmdline.txt`.
+`enable_uart=1` enables the serial interface and `pi3-miniuart-bt` moves Bluetooth to the mini UART, so the stable hardware UART `/dev/ttyAMA0` is free for the SIM868 HAT. The serial login console is removed from `cmdline.txt`.
 
 ### Python environment
 
