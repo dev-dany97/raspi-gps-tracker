@@ -2,6 +2,10 @@
 
 GPS tracker based on a Raspberry Pi and a GSM/GPRS/GNSS HAT (SIM868). The tracker reads its position via GNSS, uploads it over the mobile network (GPRS) to the IoT platform [Ubidots](https://ubidots.com) and sends a daily status SMS with its last known location.
 
+## Idea
+
+The tracker is meant as theft protection for a bike. Hidden on the bike, it reports its position over the mobile network on its own, without a smartphone or WiFi nearby. If the bike gets stolen, the dashboard shows where it is now and, just as important, **when and where it was last seen**. Even if the thief finds and switches off the tracker, the last known position and its timestamp remain as a starting point for the search, and the daily status SMS shows that the tracker is still alive.
+
 ## Why a custom tracker?
 
 Before this project I tried a commercial GPS tracker. It did not work reliably and needs a relatively large battery to run for a reasonable time. Building my own tracker on a Raspberry Pi with a SIM868 HAT gives full control over when positions are taken and uploaded, and the data ends up in my own Ubidots dashboard instead of a vendor cloud.
