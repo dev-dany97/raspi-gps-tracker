@@ -91,6 +91,10 @@ python3 controller.py
 
 After startup the logo is printed, then the tracker connects to the HAT, enables GNSS and GPRS and starts tracking. The positions show up in the Ubidots dashboard of the device.
 
+Ubidots dashboard with a sample ride along the Danube cycle path in Regensburg (map widget with the `position` variable):
+
+![Ubidots dashboard with a sample ride](docs/images/ubidots-dashboard.jpg)
+
 ## Development
 
 The `Makefile` bundles the common tasks:
