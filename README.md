@@ -4,13 +4,13 @@ GPS tracker based on a Raspberry Pi and a GSM/GPRS/GNSS HAT (SIM868). The tracke
 
 ## Idea
 
-The tracker is meant as theft protection for a bike. Hidden on the bike, it reports its position over the mobile network on its own, without a smartphone or WiFi nearby. If the bike gets stolen, the dashboard shows where it is now and, just as important, **when and where it was last seen**. Even if the thief finds and switches off the tracker, the last known position and its timestamp remain as a starting point for the search, and the daily status SMS shows that the tracker is still alive.
+I developed this GPS tracker as a theft protection for my bicycle. If the bike gets stolen, my Ubidots dashboard shows **when and where it was last seen**. Even if the thief finds and switches off the tracker, the last known position and its timestamp remain as a starting point for the search, and the daily status SMS shows that the tracker is still alive.
 
 ## Why a custom tracker?
 
 Before this project I tried a commercial GPS tracker. It did not work reliably and needs a relatively large battery to run for a reasonable time. Building my own tracker on a Raspberry Pi with a SIM868 HAT gives full control over when positions are taken and uploaded, and the data ends up in my own Ubidots dashboard instead of a vendor cloud.
 
-![Opened commercial GPS tracker that was used before](docs/images/commercial-tracker.jpg)
+<img src="docs/images/commercial-tracker.jpg" alt="Opened commercial GPS tracker that was used before" width="360">
 
 ## Features
 
@@ -30,7 +30,7 @@ Before this project I tried a commercial GPS tracker. It did not work reliably a
 | Power bank | goobay 5000 mAh |
 | SIM card | Things Mobile IoT SIM (APN `TM`, set in `src/constants.py`) |
 
-![Hardware setup: power bank, SIM868 HAT mounted on the Raspberry Pi, spare HAT and Raspberry Pi Zero W](docs/images/hardware-setup.jpg)
+<img src="docs/images/hardware-setup.jpg" alt="Hardware setup: power bank, SIM868 HAT mounted on the Raspberry Pi, spare HAT and Raspberry Pi Zero W" width="360">
 
 For first tests on a Windows PC, the CP210x USB driver and an AT command tester are included in `extra/`.
 
@@ -95,7 +95,7 @@ python3 controller.py
 
 After startup the logo is printed, then the tracker connects to the HAT, enables GNSS and GPRS and starts tracking. The positions show up in the Ubidots dashboard of the device:
 
-![Ubidots dashboard with a sample ride](docs/images/ubidots-dashboard.jpg)
+<img src="docs/images/ubidots-dashboard.jpg" alt="Ubidots dashboard with a sample ride" width="700">
 
 ## Development
 
